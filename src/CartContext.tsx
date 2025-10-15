@@ -5,12 +5,15 @@ type Product = {
   id: number;
   title: string;
   thumbnail: string;
-price: number;
+  price: number;
+  quantity: number;
 };
 
 type CartContextType = {
   cartItems: Product[];
   addToCart: (product: Product) => void;
+  removeFromCart: (id: number) => void;
+  updateQuantity: (id: number, quantity: number) => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -23,26 +26,47 @@ export const useCart = () => {
   return context;
 };
 
-
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  // Загружаем корзину из localStorage (один раз при монтировании)
   const [cartItems, setCartItems] = useState<Product[]>(() => {
     const storedCart = localStorage.getItem("cart");
     return storedCart ? JSON.parse(storedCart) : [];
   });
 
-    useEffect(() => {
+  useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cartItems));
   }, [cartItems]);
 
-  // Функция добавления товара в корзину
   const addToCart = (product: Product) => {
-    setCartItems((prev) => [...prev, product]);
+    setCartItems((prev) => {
+      const exists = prev.find((item) => item.id === product.id);
+      if (exists) {
+        // if we already have the product -> +1
+        return prev.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      } else {
+        // if the new one we put the quantity 1
+        return [...prev, { ...product, quantity: 1 }];
+      }
+    });
   };
 
-  // Возвращаем провайдер с нужным значением
+  const removeFromCart = (id: number) => {
+    setCartItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const updateQuantity = (id: number, quantity: number) => {
+    setCartItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, quantity } : item))
+    );
+  };
+
   return (
-    <CartContext.Provider value={{ cartItems, addToCart }}>
+    <CartContext.Provider
+      value={{ cartItems, addToCart, removeFromCart, updateQuantity }}
+    >
       {children}
     </CartContext.Provider>
   );

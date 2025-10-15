@@ -2,8 +2,6 @@ import "./Card.css";
 import React, { useState } from "react";
 import { useCart } from "./CartContext";
 
-
-
 type Props = {
   id: number;
   title: string;
@@ -11,7 +9,7 @@ type Props = {
   price: number;
 };
 
-const Card = ({ id, title, thumbnail, price}: Props) => {
+const Card = ({ id, title, thumbnail, price }: Props) => {
   const [likes, setLikes] = useState(0);
   const { addToCart } = useCart();
 
@@ -20,7 +18,7 @@ const Card = ({ id, title, thumbnail, price}: Props) => {
   };
 
   const handleAddToCart = () => {
-    addToCart({ id, title, thumbnail, price });
+    addToCart({ id, title, thumbnail, price, quantity: 1 });
   };
 
   return (
@@ -31,8 +29,11 @@ const Card = ({ id, title, thumbnail, price}: Props) => {
       <button className="like-button" onClick={handleLike}>
         {"\u2764"} {likes}
       </button>
-      <button className="bg-slate-400 m-1 p-1 rounded-md text-sm shadow-sm shadow-gray-600 text-white" onClick={handleAddToCart}>
-      Add to the cart
+      <button
+        className="bg-slate-400 m-1 p-1 rounded-md text-sm shadow-sm shadow-gray-600 text-white"
+        onClick={handleAddToCart}
+      >
+        Add to the cart
       </button>
     </div>
   );
